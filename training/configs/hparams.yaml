@@ -1,0 +1,45 @@
+# Training Configuration for Stable Fine-Tuning 
+
+# Number of times the model sees the full dataset. 
+# Small value (4) prevents overfitting and instruction drift on small support datasets[cite: 37, 42].
+epochs: 4 
+
+# Lower learning rate (3e-5) is used to maintain stability in Transformer models. 
+# It prevents "NaN" loss and catastrophic forgetting[cite: 38, 42].
+learning_rate: 3e-5 
+
+# Amount of data processed per GPU step. 
+# Set to 8 to avoid "CUDA Out of Memory" (OOM) errors on standard GPUs[cite: 39, 42].
+batch_size: 8 
+
+# Number of steps to accumulate gradients before updating weights. 
+# Effective Batch Size = 8 (batch_size) * 4 = 32. This keeps memory low but gradients stable[cite: 39, 42].
+grad_accumulation_steps: 4 
+
+# Clips gradients if they exceed 1.0. 
+# Directly solves the "Gradient Explosion" (NaN loss) identified in Part 2 diagnosis[cite: 40, 42].
+gradient_clip_norm: 1.0 
+
+# Slowly increases LR at the start (first 1000 steps). 
+# Prevents large weight updates early on, which often leads to training crashes[cite: 41, 42].
+warmup_steps: 1000 
+
+# Regularization technique (L2) that penalizes large weights. 
+# Helps the model generalize better to new support tickets and prevents overfitting[cite: 29, 42].
+weight_decay: 0.01 
+
+# Standard optimizer for transformers that decouples weight decay. 
+# Most reliable for instruction tuning and chat-style assistant tasks.
+optimizer: adamw 
+
+# Uses FP16/BF16 instead of FP32 where possible. 
+# Speeds up training and reduces memory usage without losing significant accuracy.
+mixed_precision: true 
+
+# Monitors validation loss and stops training if the model stops improving. 
+# Essential for "Safe Deployment" to ensure the model doesn't overfit on bad data[cite: 8, 42].
+early_stopping: true 
+
+# Number of evaluation epochs to wait for improvement before stopping. 
+# A low value (1) ensures we don't waste compute on a model that has started to diverge.
+early_stopping_patience: 1
